@@ -1,6 +1,9 @@
 package com.debitinstruction;
 
+import com.debitinstruction.models.BusinessRules;
 import com.debitinstruction.models.DebitInstruction;
+import com.debitinstruction.models.DebitInstructionDay;
+import com.debitinstruction.models.DebitInstructionUpdate;
 import io.micronaut.http.*;
 import io.micronaut.http.annotation.*;
 import io.micronaut.http.exceptions.HttpStatusException;
@@ -32,25 +35,29 @@ public class DebitInstructionController {
     }
 
     @Put
-    public void updateDebitInstruction(HttpRequest<?> request){
+    public HttpResponse<?> updateDebitInstruction(HttpRequest<?> request, @QueryValue String customerId, @QueryValue String mortgageId, @Body DebitInstructionDay debInstructSelectedDay) {
 
-        //If the customer is updating their selected day of month (and they have already paid this month) then we want to update their "next payment date" to reflect the day change occurring next month.
-        //If they have not yet paid this month, their next payment date will not change (and the future next payment date will be updated when the payment is paid as standard)
-//        Calendar today = Calendar.getInstance();
-//        if(today.get(Calendar.DAY_OF_MONTH) >= debInstructSelectedDay) {
-//            Calendar nextMonth = Calendar.getInstance();
-//            nextMonth.add(Calendar.MONTH, 1);
-//
-//            // Check if the debInstructSelectedDay is valid for that month
-//            if (debInstructSelectedDay > nextMonth.getActualMaximum(Calendar.DAY_OF_MONTH)) {
-//                nextMonth.set(Calendar.DAY_OF_MONTH, nextMonth.getActualMaximum(Calendar.DAY_OF_MONTH));  // set to last day of the month
-//            } else {
-//                nextMonth.set(Calendar.DAY_OF_MONTH, debInstructSelectedDay);
-//            }
-//            Date newPaymentDate = nextMonth.getTime();
-//        }
+        DebitInstruction currentInstruction;
+        int newSelectedDay = debInstructSelectedDay.getDebInstructSelectedDay();
 
-        //update row with new day of month and newPaymentDate (and error handling and log)
+        try {
+            currentInstruction = client.getDebitInstruction(customerId, mortgageId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new HttpStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error fetching current debit instruction data.");
+        }
+
+        BusinessRules rules = new BusinessRules();
+        DebitInstructionUpdate debitInstructionUpdate = rules.applyBusinessRules(currentInstruction, newSelectedDay);
+        try{
+            HttpResponse<?> response = client.updateDebitInstruction(customerId, mortgageId,debitInstructionUpdate);
+            if (response.getStatus() == HttpStatus.NO_CONTENT){
+                return HttpResponse.noContent();
+            } else return HttpResponse.serverError("Unexpected response from data-service");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new HttpStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating current debit instruction data.");
+        }
     }
 
 }

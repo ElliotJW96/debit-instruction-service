@@ -27,5 +27,13 @@ public class DebitInstructionUpdate {
     public void setDebInstructNextPaymentDate(LocalDate debInstructNextPaymentDate) {
         this.debInstructNextPaymentDate = debInstructNextPaymentDate;
     }
+
+    @Override
+    public String toString() {
+        return "DebitInstructionUpdate{" +
+                "debInstructSelectedDay=" + debInstructSelectedDay +
+                ", debInstructNextPaymentDate=" + debInstructNextPaymentDate +
+                '}';
+    }
 }
 
