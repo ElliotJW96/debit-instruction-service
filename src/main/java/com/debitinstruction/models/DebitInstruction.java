@@ -5,7 +5,6 @@ import io.micronaut.serde.annotation.Serdeable;
 
 import java.sql.Timestamp;
 import java.sql.Date;
-import java.time.LocalDate;
 
 @Introspected
 @Serdeable
@@ -14,7 +13,7 @@ public class DebitInstruction {
     String debInstructId;
     String debInstructMortgageId;
     int debInstructSelectedDay;
-    LocalDate debInstructNextPaymentDate;
+    Date debInstructNextPaymentDate;
     String debInstructOriginAccount;
     String debInstructOriginSortCode;
     Timestamp debInstructDate;
@@ -43,11 +42,11 @@ public class DebitInstruction {
         this.debInstructSelectedDay = debInstructSelectedDay;
     }
 
-    public LocalDate getDebInstructNextPaymentDate() {
+    public Date getDebInstructNextPaymentDate() {
         return debInstructNextPaymentDate;
     }
 
-    public void setDebInstructNextPaymentDate(LocalDate debInstructNextPaymentDate) {
+    public void setDebInstructNextPaymentDate(Date debInstructNextPaymentDate) {
         this.debInstructNextPaymentDate = debInstructNextPaymentDate;
     }
 
